@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دليل طالب الصيدلة التفاعلي - الجزائر</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals with Teal Accent -->
+    <!-- Application Structure Plan: The application is structured as a task-oriented dashboard. It begins with a contextual introduction and a chart visualizing resource importance. The core is the "Resource Explorer," a filterable grid of resource cards, allowing users to find materials by subject and type. This is followed by a "Study Strategy" section that visually represents the report's recommended tiered approach using a CSS-based diagram. Finally, a "Resource Hub" provides direct access to purchasing and community platforms. This structure was chosen to transform the linear report into an active, user-driven tool, prioritizing the student's primary task of finding specific resources quickly while also providing strategic guidance in a digestible format. -->
+    <!-- Visualization & Content Choices: 
+        1. Report Info: Relative importance of resource types (Polycopiés, local vs. international books). Goal: Compare. Viz Method: Chart.js Doughnut Chart. Interaction: Hover tooltips. Justification: Visually emphasizes the report's key strategic point to start with local materials.
+        2. Report Info: List of all books and resources. Goal: Organize/Inform. Viz Method: Interactive filterable cards. Interaction: JS-powered buttons to filter cards by subject and type. Justification: Provides a direct, fast way for users to find specific information, which is the core function of the app.
+        3. Report Info: Tiered strategy for acquiring resources. Goal: Organize/Inform. Viz Method: HTML/CSS stepped diagram. Interaction: Static visual. Justification: Converts a text list into a more memorable and intuitive visual guide for academic planning.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .active-filter {
+            background-color: #0d9488; /* teal-600 */
+            color: white;
+            border-color: #0d9488;
+        }
+        .inactive-filter {
+            background-color: white;
+            color: #334155; /* slate-700 */
+            border-color: #cbd5e1; /* slate-300 */
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-teal-800 mb-2">دليل طالب الصيدلة التفاعلي</h1>
+            <p class="text-lg text-slate-600">مرجعك الشامل للمصادر الأكاديمية والمناهج الدراسية في الجزائر</p>
+        </header>
+
+        <main>
+            <section id="intro" class="mb-16 bg-white p-6 rounded-lg shadow-sm">
+                <h2 class="text-2xl font-bold text-teal-700 mb-4">مقدمة: مفتاح التفوق في دراسة الصيدلة</h2>
+                <div class="flex flex-col md:flex-row gap-8 items-center">
+                    <div class="md:w-2/3">
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            تعتمد دراسة الصيدلة في الجزائر على نظام هجين فريد يدمج بين المراجع الدولية العريقة، خاصة باللغة الفرنسية، والمواد الدراسية المحلية التي يعدها الأساتذة الجزائريون والمعروفة بـ "Polycopiés". هذا الدليل مصمم لمساعدتك على التنقل في هذا المشهد الأكاديمي بذكاء. ستجد هنا توصيات بالكتب الأساسية، والمصادر الرقمية، والمجتمعات الطلابية التي تشكل معًا خارطة طريقك نحو النجاح.
+                        </p>
+                        <p class="text-slate-700 leading-relaxed">
+                            يوضح الرسم البياني أهمية البدء بالموارد المحلية التي تشكل أساس المنهج الدراسي والامتحانات، ثم التوسع نحو المراجع الدولية لتعميق الفهم.
+                        </p>
+                    </div>
+                    <div class="md:w-1/3 w-full">
+                        <div class="chart-container">
+                            <canvas id="resourceImportanceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="explorer" class="mb-16">
+                <h2 class="text-3xl font-bold text-center text-teal-700 mb-8">مستكشف الموارد الدراسية</h2>
+                
+                <div id="filters" class="mb-8">
+                    <div class="mb-6">
+                        <h3 class="font-bold text-lg text-slate-700 mb-3 text-center">تصفية حسب المادة الدراسية:</h3>
+                        <div id="subject-filters" class="flex flex-wrap justify-center gap-2">
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg text-slate-700 mb-3 text-center">تصفية حسب نوع المورد:</h3>
+                        <div id="type-filters" class="flex flex-wrap justify-center gap-2">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="resource-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                </div>
+            </section>
+            
+            <section id="strategy" class="mb-16 bg-white p-8 rounded-lg shadow-sm">
+                <h2 class="text-3xl font-bold text-center text-teal-700 mb-8">منهجية استراتيجية لاكتساب الموارد</h2>
+                <p class="text-center text-slate-600 max-w-3xl mx-auto mb-12">
+                    بناء مكتبتك الأكاديمية ليس سباقًا لجمع الكتب، بل عملية استراتيجية. اتبع هذا النهج المتدرج لتحقيق أقصى استفادة بأقل تكلفة وجهد، مما يضمن لك التفوق الأكاديمي والاستعداد الأمثل لمسابقة الإقامة.
+                </p>
+                <div class="relative flex flex-col items-center gap-4">
+                    <div class="w-2 bg-teal-200 absolute h-full top-0 z-0"></div>
+                    <div class="strategy-step w-full max-w-md bg-teal-50 border-r-4 border-teal-500 p-4 rounded-lg shadow-md z-10">
+                        <h3 class="font-bold text-lg text-teal-800">المستوى الأول: الأساس المجاني</h3>
+                        <p class="text-slate-700">ابدأ بجمع مطبوعات المحاضرات (Polycopiés) من جامعتك وانضم إلى مجموعات فيسبوك الطلابية. هذه هي الخطوة الأعلى مردودًا والأقل تكلفة.</p>
+                    </div>
+                    <div class="strategy-step w-full max-w-md bg-teal-50 border-r-4 border-teal-500 p-4 rounded-lg shadow-md z-10">
+                        <h3 class="font-bold text-lg text-teal-800">المستوى الثاني: النصوص الجزائرية الأساسية</h3>
+                        <p class="text-slate-700">اشترِ الكتب الرئيسية للمؤلفين الجزائريين (مثل كتاب دنين في الصيدلة الجالينيكية) من ديوان المطبوعات الجامعية والمكتبات المحلية.</p>
+                    </div>
+                    <div class="strategy-step w-full max-w-md bg-teal-50 border-r-4 border-teal-500 p-4 rounded-lg shadow-md z-10">
+                        <h3 class="font-bold text-lg text-teal-800">المستوى الثالث: المراجع الدولية الرئيسية</h3>
+                        <p class="text-slate-700">حدد أهم مرجع دولي أو اثنين للمواد التي تحتاج فيها لتعميق الفهم (مثل كتاب برونتون في علم العقاقير). استشرها في المكتبة أولاً قبل الشراء.</p>
+                    </div>
+                    <div class="strategy-step w-full max-w-md bg-teal-50 border-r-4 border-teal-500 p-4 rounded-lg shadow-md z-10">
+                        <h3 class="font-bold text-lg text-teal-800">المستوى الرابع: المكملات الرقمية</h3>
+                        <p class="text-slate-700">استخدم المنصات الرقمية مثل EncyPharma للمراجعة المستهدفة والتحضير للامتحانات، واستكشف الموارد العربية لتعزيز المفاهيم.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="hub" class="mb-8">
+                <h2 class="text-3xl font-bold text-center text-teal-700 mb-8">مركز المصادر والمجتمعات</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-lg shadow-sm">
+                        <h3 class="font-bold text-xl text-teal-800 mb-3">مكتبات ومتاجر محلية</h3>
+                        <ul class="list-disc list-inside space-y-2 text-slate-700">
+                            <li><strong>Livres Médicaux Algerie:</strong> متخصص رائد في الكتب الطبية، يوفر توصيلاً لـ 58 ولاية.</li>
+                            <li><strong>ديوان المطبوعات الجامعية (OPU):</strong> المصدر الرسمي للكتب الأكاديمية الجزائرية.</li>
+                            <li><strong>Jumia.dz:</strong> يعرض بعض الكتب الطبية والصيدلانية.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm">
+                        <h3 class="font-bold text-xl text-teal-800 mb-3">منصات رقمية وتعليمية</h3>
+                        <ul class="list-disc list-inside space-y-2 text-slate-700">
+                            <li><strong>EncyPharma:</strong> منصة جزائرية تقدم دورات وأسئلة لمراجعة المواد.</li>
+                            <li><strong>PharmaStudy DZ:</strong> مستودع طلابي لمشاركة المطبوعات ومواد الامتحانات.</li>
+                            <li><strong>Aramebook:</strong> منصة جزائرية لبيع الكتب الإلكترونية.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm">
+                        <h3 class="font-bold text-xl text-teal-800 mb-3">مجتمعات طلابية</h3>
+                        <ul class="list-disc list-inside space-y-2 text-slate-700">
+                            <li><strong>مجموعات فيسبوك:</strong> المصدر الأقوى للتواصل بين الأقران. ابحث عن مجموعة لجامعتك (قسنطينة، الجزائر، وهران، إلخ).</li>
+                            <li><strong>المكتبات الجامعية:</strong> توفر وصولاً مجانياً للمراجع الدولية باهظة الثمن.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="text-center mt-12 pt-6 border-t border-slate-200">
+            <p class="text-slate-500">تم تصميم هذا الدليل التفاعلي لتسهيل رحلتك الأكاديمية. بالتوفيق في دراستك!</p>
+        </footer>
+
+    </div>
+
+    <script>
+        const resources = [
+            { title: 'Vidal Dictionnaire', author: 'Vidal', subject: 'general', type: 'international_book', description: 'المرجع الأساسي للأدوية في العالم الفرنكفوني، ضروري للممارسة السريرية.', availability: 'متوفر محلياً ودولياً' },
+            { title: 'مبادئ وأساسيات علم الصيدلة', author: 'غير محدد', subject: 'general', type: 'arabic_book', description: 'مرجع شامل باللغة العربية يغطي مختلف التخصصات، مثالي للفهم التأسيسي.', availability: 'متوفر دولياً' },
+            { title: 'Cours de Chimie Organique Pharmaceutique', author: 'د. رزام زهيرة', subject: 'chemistry', type: 'local_resource', description: 'مطبوعة موجهة لطلاب الماستر من جامعة بشار.', availability: 'مطبوعات جامعية' },
+            { title: 'Chimie Organique Pharmaceutique', author: 'د. عامر بوتيتي', subject: 'chemistry', type: 'local_resource', description: 'مطبوعة مخصصة لطلاب السنة الأولى صيدلة في جامعة قسنطينة 3.', availability: 'مطبوعات جامعية' },
+            { title: 'Guide pratique en chimie médicinale', author: 'سوداني، حجاج، وآخرون', subject: 'chemistry', type: 'local_book', description: 'دليل عملي من تأليف أكاديميين جزائريين، مصمم خصيصاً للطلاب هنا.', availability: 'متوفر دولياً' },
+            { title: 'Chimie Générale / Organique', author: 'Atkins/Arnaud', subject: 'chemistry', type: 'international_book', description: 'كتب مرجعية دولية كلاسيكية توفر الأساس النظري العميق.', availability: 'متوفر في المكتبات الجامعية' },
+            { title: 'Anatomie médicale & Physiologie', author: 'متعددون', subject: 'biology', type: 'international_book', description: 'مراجع دولية شاملة وغنية بالرسوم التوضيحية لفهم جسم الإنسان.', availability: 'متوفر محلياً' },
+            { title: 'Cours de pharmacie galénique', author: 'Rachid DENINE', subject: 'galenics', type: 'local_book', description: 'الكتاب المرجعي الرسمي في المنهج الجزائري، وأساسي لمسابقة الإقامة.', availability: 'ديوان المطبوعات الجامعية (OPU)' },
+            { title: 'Introduction à la pharmacie galénique', author: 'جامعة باتنة 2', subject: 'galenics', type: 'local_resource', description: 'مقدمة على مستوى السنة الثالثة تركز على تصنيع الأدوية.', availability: 'مطبوعات جامعية' },
+            { title: 'Pharmacognosie, phytochimie, plantes médicinales', author: 'Jean Bruneton', subject: 'pharmacognosy', type: 'international_book', description: 'المرجع الدولي الشامل ("الكتاب المقدس") في هذا المجال.', availability: 'متوفر في المكتبات الجامعية ومحلياً' },
+            { title: 'Pharmacologie générale', author: 'Pr. Miloud SLIMANI', subject: 'pharmacology', type: 'local_book', description: 'من تأليف أستاذ جزائري (جامعة سعيدة)، مصمم كأداة تعليمية للطلاب.', availability: 'متوفر دولياً' },
+            { title: 'Pharmacie clinique et thérapeutique', author: 'ANEPC, S. Limat, et al.', subject: 'clinical', type: 'international_book', description: 'مرجع ضخم وشامل يغطي العلاجات حسب الأجهزة، من إعداد خبراء فرنكفونيين.', availability: 'متوفر محلياً ودولياً' },
+            { title: 'Médicaments - Réussir l\'internat de pharmacie', author: 'V. Bianchi, S. El Anbassi', subject: 'exam_prep', type: 'international_book', description: 'أداة مراجعة مركزة ومنظمة في جداول، مثالية للتحضير لمسابقة الإقامة.', availability: 'متوفر دولياً' },
+            { title: 'Toxicologie', author: 'Objectif Internat Pharmacie', subject: 'toxicology', type: 'international_book', description: 'كتاب تحضيري متخصص لمسابقة الإقامة.', availability: 'متوفر دولياً' },
+            { title: 'EncyPharma - Pharmacognoisie 3', author: 'EncyPharma', subject: 'pharmacognosy', type: 'digital_resource', description: 'دورة كاملة عبر الإنترنت مصممة خصيصاً للطلاب الجزائريين.', availability: 'منصة رقمية' },
+            { title: 'Polycopiés de Pharmacie Clinique', author: 'جامعة قسنطينة', subject: 'clinical', type: 'local_resource', description: 'مذكرات مقررات للسنة الخامسة توضح كيفية تدريس العلاجات محلياً.', availability: 'مستودعات طلابية' },
+        ];
+
+        const subjectMap = {
+            all: 'كل المواد',
+            general: 'مراجع عامة',
+            chemistry: 'الكيمياء',
+            biology: 'علوم الأحياء',
+            galenics: 'صيدلة جالينيكية',
+            pharmacognosy: 'علم العقاقير',
+            pharmacology: 'علم الأدوية',
+            clinical: 'صيدلة سريرية وعلاجات',
+            toxicology: 'علم السموم',
+            exam_prep: 'تحضير للامتحانات'
+        };
+
+        const typeMap = {
+            all: 'كل الأنواع',
+            local_book: 'كتاب جزائري',
+            international_book: 'كتاب دولي',
+            local_resource: 'مطبوعات محلية',
+            digital_resource: 'مورد رقمي',
+            arabic_book: 'مرجع عربي'
+        };
+
+        const resourceGrid = document.getElementById('resource-grid');
+        const subjectFiltersContainer = document.getElementById('subject-filters');
+        const typeFiltersContainer = document.getElementById('type-filters');
+
+        let currentSubjectFilter = 'all';
+        let currentTypeFilter = 'all';
+
+        function renderResources() {
+            resourceGrid.innerHTML = '';
+            const filteredResources = resources.filter(resource => 
+                (currentSubjectFilter === 'all' || resource.subject === currentSubjectFilter) &&
+                (currentTypeFilter === 'all' || resource.type === currentTypeFilter)
+            );
+
+            if (filteredResources.length === 0) {
+                resourceGrid.innerHTML = `<p class="text-center text-slate-500 col-span-full">لا توجد موارد تطابق معايير البحث الحالية.</p>`;
+                return;
+            }
+
+            filteredResources.forEach(resource => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-6 rounded-lg shadow-sm border border-slate-200 flex flex-col';
+                card.innerHTML = `
+                    <h4 class="text-xl font-bold text-teal-800 mb-2">${resource.title}</h4>
+                    <p class="text-sm text-slate-500 mb-3"><strong>المؤلف/المصدر:</strong> ${resource.author}</p>
+                    <p class="text-slate-700 mb-4 flex-grow">${resource.description}</p>
+                    <div class="mt-auto pt-4 border-t border-slate-100 flex justify-between items-center text-sm">
+                        <span class="font-semibold text-slate-600">${typeMap[resource.type]}</span>
+                        <span class="px-2 py-1 bg-teal-50 text-teal-700 rounded-full text-xs">${resource.availability}</span>
+                    </div>
+                `;
+                resourceGrid.appendChild(card);
+            });
+        }
+
+        function createFilters(container, filterMap, filterHandler, currentFilter) {
+            Object.entries(filterMap).forEach(([key, value]) => {
+                const button = document.createElement('button');
+                button.className = 'px-4 py-2 text-sm font-semibold rounded-full border transition-colors duration-200';
+                button.textContent = value;
+                button.dataset.filter = key;
+                button.classList.add(key === currentFilter ? 'active-filter' : 'inactive-filter');
+                button.addEventListener('click', () => filterHandler(key));
+                container.appendChild(button);
+            });
+        }
+
+        function handleSubjectFilter(subject) {
+            currentSubjectFilter = subject;
+            updateFilterButtons(subjectFiltersContainer, subject);
+            renderResources();
+        }
+
+        function handleTypeFilter(type) {
+            currentTypeFilter = type;
+            updateFilterButtons(typeFiltersContainer, type);
+            renderResources();
+        }
+
+        function updateFilterButtons(container, activeFilter) {
+            container.querySelectorAll('button').forEach(button => {
+                button.classList.remove('active-filter', 'inactive-filter');
+                button.classList.add(button.dataset.filter === activeFilter ? 'active-filter' : 'inactive-filter');
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            createFilters(subjectFiltersContainer, subjectMap, handleSubjectFilter, currentSubjectFilter);
+            createFilters(typeFiltersContainer, typeMap, handleTypeFilter, currentTypeFilter);
+            renderResources();
+
+            const ctx = document.getElementById('resourceImportanceChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['المطبوعات المحلية (Polycopiés)', 'الكتب الجزائرية', 'الكتب الدولية', 'الموارد الرقمية'],
+                    datasets: [{
+                        label: 'أهمية المصادر',
+                        data: [40, 30, 20, 10],
+                        backgroundColor: [
+                            '#14b8a6', // teal-500
+                            '#5eead4', // teal-300
+                            '#99f6e4', // teal-200
+                            '#ccfbf1'  // teal-100
+                        ],
+                        borderColor: '#f8fafc',
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    family: "'Tajawal', sans-serif"
+                                }
+                            }
+                        },
+                        tooltip: {
+                            bodyFont: {
+                                family: "'Tajawal', sans-serif"
+                            },
+                            titleFont: {
+                                family: "'Tajawal', sans-serif"
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
